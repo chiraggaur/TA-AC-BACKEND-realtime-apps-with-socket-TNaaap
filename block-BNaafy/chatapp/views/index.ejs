@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        padding: 8px;
+        background: #f1f1f1;
+        margin-bottom: 5px;
+      }
+      form {
+        display: flex;
+      }
+      input {
+        flex: 1;
+        padding: 10px;
+      }
+      button {
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" />
+      <button>Send</button>
+    </form>
+
+    <script>
+      const socket = io();
+
+      // Listen for previous messages from the server
+      socket.on("previous-messages", function (msgs) {
+        msgs.forEach((msg) => {
+          const item = document.createElement("li");
+          item.textContent = msg;
+          document.getElementById("messages").appendChild(item);
+        });
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      // Listen new chat messages from the server
+      socket.on("chat-message", function (msg) {
+        const item = document.createElement("li");
+        item.textContent = msg;
+        document.getElementById("messages").appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      // Send message on form submission
+      document.getElementById("form").addEventListener("submit", function (e) {
+        e.preventDefault(); // Prevents the form from refreshing the page
+        const input = document.getElementById("input");
+        if (input.value) {
+          socket.emit("chat-message", input.value);
+          input.value = ""; // Clear the input after sending
+        }
+      });
+    </script>
+  </body>
+</html>
